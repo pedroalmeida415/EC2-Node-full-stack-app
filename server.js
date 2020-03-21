@@ -7,6 +7,12 @@ app.use(session({ secret: "messagesHosting", name: "session" }));
 
 let message = "";
 
+app.get("/", function(req, res) {
+    res.status(301);
+    res.redirect("/message");
+    res.end();
+});
+
 app.get("/message", function(req, res) {
     let echoMessage = req.session.message || message;
     if (echoMessage) {
