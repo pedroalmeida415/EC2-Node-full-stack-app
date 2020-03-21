@@ -55,4 +55,10 @@ app.post("/reset", function(req, res) {
     res.end();
 });
 
+app.use(function(req, res, next) {
+    res.setHeader("404", "Content-Type", "text/plain");
+    res.status(404).send("Sorry, this page doesn't exists!");
+    res.end();
+});
+
 app.listen(8080, () => console.log("Running at port 8080"));
