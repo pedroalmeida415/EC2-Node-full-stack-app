@@ -5,34 +5,30 @@ var session = require("cookie-session");
 
 app.use(session({ secret: "messagesHosting", name: "session" }));
 
+let message = "";
+
 app.get("/message", function(req, res) {
-    let message = req.session.message;
-    if (message) {
+    let echoMessage = req.session.message || message;
+    if (echoMessage) {
         res.setHeader("200", "Content-Type", "text/plain");
         res.status(200);
-        if (parseInt(message)) {
+        if (parseInt(echoMessage)) {
             return setTimeout(() => {
                 return res.end(
-                    `Message Received: ${message}; Number detected... Increased response delay by ${message}ms.`
+                    `Message Received: ${echoMessage}; Number detected... Increased response delay by ${echoMessage}ms.`
                 );
-            }, message);
+            }, echoMessage);
         }
-        return res.end(`Message Received: ${message}`);
+        return res.end(`Message Received: ${echoMessage}`);
     }
     res.setHeader("419", "Content-Type", "text/plain");
     res.status(419);
     res.end();
 });
 
-app.post("/message/", function(req, res) {
-    req.session.message = "";
-
-    res.status(204);
-    res.end();
-});
-
 app.post("/message/:message", function(req, res) {
     req.session.message = req.params.message;
+    message = req.params.message;
 
     res.status(204);
     res.end();
@@ -41,9 +37,9 @@ app.post("/message/:message", function(req, res) {
 app.get("/memory_usage", function(req, res) {
     res.setHeader("200", "Content-Type", "text/plain");
 
-    let memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024;
+    let memoryUsage = process.memoryUsage().rss / 1024 / 1024;
 
-    res.end(`The script uses approximately ${Math.round(memoryUsage * 100) / 100} MB`);
+    res.end(`The server process is currently using approximately ${Math.round(memoryUsage * 100) / 100} MB`);
 });
 
 app.post("/reset", function(req, res) {
@@ -53,4 +49,4 @@ app.post("/reset", function(req, res) {
     res.end();
 });
 
-app.listen(8080, () => console.log("Running at http://localhost:8080"));
+app.listen(8080, () => console.log("Running at port 8080"));
