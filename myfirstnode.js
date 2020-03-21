@@ -6,35 +6,53 @@ var session = require("cookie-session"); // Loads the piece of middleware for se
 var bodyParser = require("body-parser"); // Loads the piece of middleware for managing the settings
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
-app.use(session({ secret: "todotopsecret", name: "session" }));
+app.use(session({ secret: "messagesHosting", name: "session" }));
 app.use(urlencodedParser);
 
-app.get("/todo", function(req, res) {
-    res.setHeader("200", "Content-Type", "text/html");
-    res.render("bedroom.ejs", {
-        tasks: req.session.tasks || []
-    });
+app.get("/message", function(req, res) {
+    res.setHeader("200", "Content-Type", "text/plain");
+    let message = req.session.message;
+    if (message) {
+        console.log(req.session.message);
+        if (parseInt(message)) {
+            return setTimeout(() => {
+                return res.end(
+                    `Message Received: ${message}; Number detected... Increased response delay by ${message}ms.`
+                );
+            }, message);
+        }
+        return res.end(`Message Received: ${message}`);
+    }
+    res.status(419);
     res.end();
 });
 
-app.post("/todo/add", function(req, res) {
-    req.session.tasks = req.session.tasks || [];
-    req.session.tasks.push(req.body.task);
+app.post("/message/", function(req, res) {
+    req.session.message = "";
 
-    console.log(req.session.tasks);
-    res.redirect("/todo");
+    res.status(204);
     res.end();
 });
 
-app.get("/todo/delete/:id", function(req, res) {
-    req.session.tasks.splice(req.params.id, 1);
-    res.redirect("/todo");
+app.post("/message/:message", function(req, res) {
+    req.session.message = req.params.message;
+
+    res.status(204);
     res.end();
 });
 
-app.get("/todo/reset", function(req, res) {
-    req.session = null;
-    res.redirect("/todo");
+app.get("/memory_usage", function(req, res) {
+    res.setHeader("200", "Content-Type", "text/plain");
+
+    let memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024;
+
+    res.end(`The script uses approximately ${Math.round(memoryUsage * 100) / 100} MB`);
+});
+
+app.post("/reset", function(req, res) {
+    req.session.message = "";
+
+    res.status(204);
     res.end();
 });
 
