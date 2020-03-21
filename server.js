@@ -6,10 +6,10 @@ var session = require("cookie-session");
 app.use(session({ secret: "messagesHosting", name: "session" }));
 
 app.get("/message", function(req, res) {
-    res.setHeader("200", "Content-Type", "text/plain");
     let message = req.session.message;
     if (message) {
-        console.log(req.session.message);
+        res.setHeader("200", "Content-Type", "text/plain");
+        res.status(200);
         if (parseInt(message)) {
             return setTimeout(() => {
                 return res.end(
@@ -19,6 +19,7 @@ app.get("/message", function(req, res) {
         }
         return res.end(`Message Received: ${message}`);
     }
+    res.setHeader("419", "Content-Type", "text/plain");
     res.status(419);
     res.end();
 });
