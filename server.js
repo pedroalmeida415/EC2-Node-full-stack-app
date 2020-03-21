@@ -1,13 +1,9 @@
 var express = require("express");
 var app = express();
-var url = require("url");
 var express = require("express");
-var session = require("cookie-session"); // Loads the piece of middleware for sessions
-var bodyParser = require("body-parser"); // Loads the piece of middleware for managing the settings
-var urlencodedParser = bodyParser.urlencoded({ extended: false });
+var session = require("cookie-session");
 
 app.use(session({ secret: "messagesHosting", name: "session" }));
-app.use(urlencodedParser);
 
 app.get("/message", function(req, res) {
     res.setHeader("200", "Content-Type", "text/plain");
