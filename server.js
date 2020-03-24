@@ -52,10 +52,10 @@ app.get("/memory_usage", function(req, res) {
     res.end(`The server process is currently using approximately ${Math.round(memoryUsage * 100) / 100} MB`);
 });
 
-app.post("/reset", function(req, res) {
+app.post("/message/", function(req, res) {
     req.session.message = "";
     message = "";
-
+    io.emit("message", message);
     res.status(204);
     res.end();
 });
