@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>EC2 Node.js App - Real-time</title>
+        <link rel="stylesheet" href="./styles/live.css" />
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet" />
+        <link
+            rel="shortcut icon"
+            type="image/png"
+            href="https://seeklogo.com/images/S/socketio-logo-B8A7F486CD-seeklogo.com.png"
+        />
+    </head>
+
+    <body>
+        <section>
+            <header>
+                <h1>Real-time Message Receiver</h1>
+                <nav>
+                    <a href="/">Dashboard</a>
+                    <a href="/netdata/">Administrator's Performance Panel</a>
+                </nav>
+            </header>
+            <div class="container">
+                <div class="currentMessage">
+                    <h2><strong>Current message:</strong></h2>
+                    <p id="message"></p>
+                </div>
+                <div class="messagesHistory">
+                    <h3>
+                        <strong>
+                            Past messages
+                        </strong>
+                    </h3>
+                    <ul class="pastMessagesList"></ul>
+                </div>
+            </div>
+        </section>
+
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io.connect(window.location.origin);
+            socket.on("message", function(data) {
+                insertMessage(data);
+            });
+
+            let messages = [];
+
+            function insertMessage(message) {
+                $("#message").text(message);
+                messages.unshift(message);
+                addToHistoryList();
+            }
+
+            function addToHistoryList(message) {
+                if (messages.length > 6) {
+                    messages.pop();
+                    $(".pastMessagesList")
+                        .children()
+                        .last()
+                        .remove();
+                }
+                if (messages.length > 1) {
+                    $(".pastMessagesList").prepend("<li>" + messages[1] + "</li>");
+                }
+            }
+        </script>
+    </body>
+</html>

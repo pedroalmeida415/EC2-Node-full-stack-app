@@ -1,16 +1,19 @@
-var express = require("express");
-var app = express();
-var express = require("express");
-var session = require("cookie-session");
+var express = require("express"),
+    app = express(),
+    server = require("http").Server(app),
+    io = require("socket.io").listen(server),
+    ent = require("ent"),
+    fs = require("fs"),
+    session = require("cookie-session");
 
 app.use(session({ secret: "messagesHosting", name: "session" }));
 
 let message = "";
 
+app.use("/styles", express.static(__dirname + "/styles"));
+
 app.get("/", function(req, res) {
-    res.status(301);
-    res.redirect("/message");
-    res.end();
+    res.sendFile(__dirname + "/index.html");
 });
 
 app.get("/message", function(req, res) {
@@ -36,6 +39,7 @@ app.post("/message/:message", function(req, res) {
     req.session.message = req.params.message;
     message = req.params.message;
 
+    io.emit("message", message);
     res.status(204);
     res.end();
 });
@@ -50,9 +54,14 @@ app.get("/memory_usage", function(req, res) {
 
 app.post("/reset", function(req, res) {
     req.session.message = "";
+    message = "";
 
     res.status(204);
     res.end();
+});
+
+app.get("/live", function(req, res) {
+    res.sendFile(__dirname + "/live.html");
 });
 
 app.use(function(req, res, next) {
@@ -61,4 +70,12 @@ app.use(function(req, res, next) {
     res.end();
 });
 
-app.listen(8080, () => console.log("Running at port 8080"));
+io.sockets.on("connection", function(socket) {
+    socket.on("message", function(message) {
+        message = ent.encode(message);
+        socket.broadcast.emit("message", { message: message });
+    });
+    io.emit("message", message);
+});
+
+server.listen(8080, () => console.log("Running on port 8080"));
