@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>EC2 Node.js Application</title>
+        <link rel="stylesheet" href="./styles/index.css" />
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet" />
+        <link
+            rel="shortcut icon"
+            type="image/png"
+            href="https://d1.awsstatic.com/icons/jp/console_ec2_icon.487ec15a7c9cf983449e6a02da0e12a5e3a2225d.png"
+        />
+    </head>
+
+    <body>
+        <section>
+            <header>
+                <h1>App Dashboard</h1>
+                <nav>
+                    <a href="/live">Real-time message</a>
+                    <a href="/netdata/">Administrator's Performance Panel</a>
+                </nav>
+            </header>
+            <div class="container">
+                <form onsubmit="getCurrentMessage()" class="getCurrentMessage">
+                    <label for="receivedMessage">Message</label>
+                    <textarea readonly name="receivedMessage" id="receivedMessage" cols="40" rows="10"></textarea>
+                    <p id="getMessageError"></p>
+                    <button id="getMessageBtn" type="submit">request</button>
+                </form>
+                <form onsubmit="sendMessage()" class="messageDispatcher">
+                    <label for="messageDispatchInput">Send message</label>
+                    <input name="messageDispatchInput" id="messageDispatchInput"></input>
+                    <p id="sendMessageError"></p>
+                    <button id="sendMessageBtn" type="submit">send</button>
+                </form>
+                <form onsubmit="getMemoryUsage()" class="getCurrentMessage">
+                    <label for="receivedMemory">Memory Usage</label>
+                    <textarea readonly name="receivedMemory" id="receivedMemory" cols="40" rows="10"></textarea>
+                    <p id="getMemoryError"></p>
+                    <button id="getMemoryBtn" type="submit">request</button>
+                </form>
+            </div>
+        </section>
+
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script>
+            function getCurrentMessage(){
+                $("#getMessageError").removeClass('visible')
+                $("#getMessageBtn").attr("disabled", true)
+                event.preventDefault()
+                $.ajax(window.location.origin+"/message", {
+                    type: "GET",
+                    success: function(result) {
+                        $("#receivedMessage").val(result)
+                        $("#getMessageBtn").attr("disabled", false)
+                    },
+                    error: function(error){
+                        console.log(error)
+                        $("#getMessageBtn").attr("disabled", false)
+                        if(error.status === 419){
+                            $("#getMessageError").text("Empty string - error 419")
+                            $("#receivedMessage").val("")
+                            $("#getMessageError").addClass('visible')
+                        }
+                    }
+                    
+                })
+            }
+
+            function sendMessage(){
+                $("#sendMessageError").removeClass('visible')
+                $("#sendMessageBtn").attr("disabled", true)
+                event.preventDefault()
+                $.ajax(window.location.origin + "/message/" + $("#messageDispatchInput").val() , {
+                    type: "POST",
+                    success: function(result) {
+                        $("#messageDispatchInput").val("")
+                        $("#sendMessageBtn").attr("disabled", false)
+                        $("#sendMessageError").addClass('visible').addClass("success")
+                        $("#sendMessageError").text('message sent successfully')
+                    },
+                    error: function(error){
+                        console.log(error)
+                        $("#sendMessageError").text("An error occured while sending the request")
+                        $("#sendMessageError").addClass('visible')
+                        $("#sendMessageBtn").attr("disabled", false)
+                    }
+                    
+                })
+            }
+
+            function getMemoryUsage(){
+                $("#getMemoryError").removeClass('visible')
+                $("#getMemoryBtn").attr("disabled", true)
+                event.preventDefault()
+                $.ajax(window.location.origin+"/memory_usage/", {
+                    type: "GET",
+                    success: function(result) {
+                        $("#receivedMemory").val(result)
+                        $("#getMemoryBtn").attr("disabled", false)
+                    },
+                    error: function(error){
+                        console.log(error)
+                        $("#getMemoryBtn").attr("disabled", false)
+                            $("#getMemoryError").text("An error occured while processing your request")
+                            $("#getMessageError").addClass('visible')
+                    }
+                    
+                })
+            }
+
+        </script>
+    </body>
+</html>
